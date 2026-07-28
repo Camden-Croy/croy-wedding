@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
+/*
+  Light theme: white base with green + pinkish-red accents.
+  Contrast targets (Req 7.1): body text and accent text >= 4.5:1 on the white base.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ffffff; /* clean white */
+  --surface: #f7f5f0; /* raised panels, warm off-white */
+  --surface-2: #eef4ee; /* cards / nav pills, faint green tint */
+  --foreground: #1e2a22; /* deep green-charcoal text ~ 13:1 on white */
+  --muted: #566b5e; /* secondary green-gray ~ 5.3:1 on white */
+  --accent: #1f7a45; /* green accent ~ 4.7:1 on white */
+  --accent-strong: #c02651; /* pinkish-red for links / emphasis ~ 5.2:1 on white */
+  --border: #dde5dd; /* soft green-gray hairline */
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-border: var(--border);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth; /* smooth anchor navigation; disabled under reduced-motion below */
+}
+
+/*
+  Card style — "letterpress / editorial".
+  A deliberate departure from soft, green-tinted panels: a clean base, a crisp
+  ink outline, near-square corners, and a hard offset drop-shadow in the pink
+  accent. Add `card--link` for interactive lift on hover.
+*/
+@layer components {
+  .card {
+    background-color: var(--background);
+    border: 1.5px solid var(--foreground);
+    border-radius: 6px;
+    box-shadow: 5px 5px 0 0 var(--accent-strong);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .card--link:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 7px 7px 0 0 var(--accent-strong);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden; /* Req 7.5: no horizontal scroll */
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+}
+
+/* Req 7.4 / 3.7.4: respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,0 +1,190 @@
+// Prisma 7 schema.
+// Note: the connection URL lives in prisma.config.ts (v7 removed `url` from the
+// datasource block); the runtime client connects via the Neon driver adapter.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// The couple's wedding details (single row).
+model Wedding {
+  id        String    @id @default(cuid())
+  date      DateTime?
+  location  String?
+  rsvpUrl   String?
+  /// How we met / our story, shown on an about section.
+  story     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/// One record per member of the couple.
+model Partner {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  bio       String?
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Gallery photos (Req 4).
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+/// Captioned photos for the "Our Story" long-distance chapter. `section`
+/// discriminates which moment a photo belongs to ("facetime" or "visits"), so a
+/// single model backs both admin CRUD surfaces. Images live in Vercel Blob and
+/// `imageUrl` holds the public blob URL.
+model StoryPhoto {
+  id        String   @id @default(cuid())
+  /// Which story moment this photo belongs to: "facetime" | "visits".
+  section   String
+  /// Public Vercel Blob URL for the uploaded image.
+  imageUrl  String
+  /// Optional caption shown beneath the image in the carousel.
+  caption   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([section, order])
+}
+
+/// Gift registry entries (Req 5).
+model RegistryItem {
+  id          String    @id @default(cuid())
+  title       String
+  description String
+  /// Optional external link to view or buy the item.
+  url         String?
+  /// Optional image for the item card.
+  imageUrl    String?
+  /// Price in cents. Null for open-ended contribution funds.
+  priceCents  Int?
+  /// Grouping label, e.g. "Honeymoon", "Kitchen", "Nest egg".
+  category    String?
+  /// A short personal note from the couple.
+  note        String?
+  /// Open-ended contribution funds are never "claimed" / marked off.
+  isFund      Boolean   @default(false)
+  /// Whether a guest has claimed (paid for) this gift.
+  purchased   Boolean   @default(false)
+  /// The invited guest who claimed it. Drives authorization: only this guest
+  /// (or an admin) may release the claim. Names stay private to the admin view.
+  claimedBy   Guest?    @relation("GuestClaims", fields: [claimedById], references: [id], onDelete: SetNull)
+  claimedById String?
+  /// Attribution for a non-invited "identified" giver (email tier). Mutually
+  /// exclusive with claimedById in practice. Release is keyed off this email.
+  claimedByEmail String?
+  claimedByName  String?
+  /// When the gift was claimed.
+  purchasedAt DateTime?
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([claimedById])
+}
+
+/// Invited guests. `identifier` maps to the ?guest= link param and
+/// `accessCode` maps to the ?code= link param (Req 1).
+model Guest {
+  id         String   @id @default(cuid())
+  identifier String   @unique
+  name       String
+  accessCode String
+  /// Whether this invitation includes a plus-one (Req 1).
+  plusOne    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  rsvp       Rsvp?
+  /// Registry gifts this guest has claimed.
+  claims     RegistryItem[] @relation("GuestClaims")
+
+  @@index([accessCode])
+}
+
+/// A guest's RSVP response (Req 3.3).
+model Rsvp {
+  id          String   @id @default(cuid())
+  guest       Guest    @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  guestId     String   @unique
+  attending   Boolean?
+  guestCount  Int      @default(1)
+  message     String?
+  respondedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth models (admin Google OAuth). Managed by Better Auth; see lib/auth.ts.
+// Schema per Better Auth 1.6.x core tables.
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
