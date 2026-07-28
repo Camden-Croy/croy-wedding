@@ -26,9 +26,14 @@ export async function POST(request: Request): Promise<Response> {
           throw new Error("Not authorized to upload.");
         }
         return {
-          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"],
+          // Wildcard so any image subtype is accepted (phone photos report a
+          // range of MIME types: image/jpeg, image/heic, image/heif, etc.). A
+          // stricter allowlist rejects the upload at the Blob API, and that
+          // error response carries no CORS header — so it surfaces in the
+          // browser as a misleading CORS error instead of "type not allowed".
+          allowedContentTypes: ["image/*"],
           addRandomSuffix: true,
-          maximumSizeInBytes: 20 * 1024 * 1024, // 20MB per photo
+          maximumSizeInBytes: 50 * 1024 * 1024, // 50MB per photo
         };
       },
       // No post-upload bookkeeping needed: the DB row is written by the

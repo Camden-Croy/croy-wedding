@@ -241,6 +241,15 @@ function PhotoForm({
   function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
     const picked = e.target.files?.[0] ?? null;
     setError(null);
+
+    // Reject obvious non-images. Files with an empty type still pass here (we
+    // default their content type to image/jpeg on upload).
+    if (picked && picked.type && !picked.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      setFile(null);
+      return;
+    }
+
     setFile(picked);
     setPreviewUrl(picked ? URL.createObjectURL(picked) : imageUrl || null);
   }
@@ -259,6 +268,10 @@ function PhotoForm({
           const blob = await upload(file.name, file, {
             access: "public",
             handleUploadUrl: "/api/blob/upload",
+            // Always send an image content type. Some files (e.g. certain phone
+            // exports) report an empty File.type, which fails the token's
+            // image/* check at the Blob API and surfaces as a CORS error.
+            contentType: file.type || "image/jpeg",
           });
           finalUrl = blob.url;
           setImageUrl(blob.url);
