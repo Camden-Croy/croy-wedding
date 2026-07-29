@@ -77,6 +77,11 @@ export function getGuestsWithRsvps() {
   });
 }
 
+/** A single guest's RSVP, used to prefill the RSVP form for returning guests. */
+export function getGuestRsvp(guestId: string) {
+  return prisma.rsvp.findUnique({ where: { guestId } });
+}
+
 export type RsvpStatus = "attending" | "declined" | "awaiting";
 
 /** Derive a single status from a guest's RSVP record. */
@@ -90,8 +95,18 @@ export interface RsvpSummary {
   attending: number;
   declined: number;
   awaiting: number;
-  /** Total expected headcount from attending parties (sum of guestCount). */
+  /**
+   * Total expected headcount from attending parties (sum of guestCount).
+   * Equals `attending` primary guests plus `plusOnesAttending`.
+   */
   headcount: number;
+  /** Plus-ones confirmed to be coming (guestCount above 1 on attending RSVPs). */
+  plusOnesAttending: number;
+}
+
+/** Whether an attending guest is bringing their plus-one. */
+export function isBringingPlusOne(guest: GuestWithRsvp): boolean {
+  return guest.plusOne && rsvpStatus(guest) === "attending" && (guest.rsvp?.guestCount ?? 1) > 1;
 }
 
 /** Roll up guest RSVP records into dashboard summary counts. */
@@ -102,7 +117,9 @@ export function summarizeRsvps(guests: GuestWithRsvp[]): RsvpSummary {
       const status = rsvpStatus(guest);
       if (status === "attending") {
         acc.attending += 1;
-        acc.headcount += guest.rsvp?.guestCount ?? 1;
+        const count = guest.rsvp?.guestCount ?? 1;
+        acc.headcount += count;
+        if (count > 1) acc.plusOnesAttending += count - 1;
       } else if (status === "declined") {
         acc.declined += 1;
       } else {
@@ -110,6 +127,6 @@ export function summarizeRsvps(guests: GuestWithRsvp[]): RsvpSummary {
       }
       return acc;
     },
-    { invited: 0, attending: 0, declined: 0, awaiting: 0, headcount: 0 },
+    { invited: 0, attending: 0, declined: 0, awaiting: 0, headcount: 0, plusOnesAttending: 0 },
   );
 }

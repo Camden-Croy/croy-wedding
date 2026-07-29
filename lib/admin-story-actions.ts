@@ -17,10 +17,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/admin";
-
-/** The two story moments that have a managed photo gallery. */
-export const STORY_SECTIONS = ["facetime", "visits"] as const;
-export type StorySection = (typeof STORY_SECTIONS)[number];
+import { isStorySection, type StorySection } from "@/lib/story-sections";
 
 export interface StoryPhotoInput {
   section: StorySection;
@@ -36,10 +33,6 @@ export interface StoryActionResult {
   error?: string;
   /** True when the caller isn't an authorized admin. */
   forbidden?: boolean;
-}
-
-function isSection(value: unknown): value is StorySection {
-  return typeof value === "string" && (STORY_SECTIONS as readonly string[]).includes(value);
 }
 
 /** Trim a string field to null when empty. */
@@ -72,7 +65,7 @@ export async function createStoryPhoto(input: StoryPhotoInput): Promise<StoryAct
     return { ok: false, forbidden: true, error: "Not authorized." };
   }
 
-  if (!isSection(input.section)) {
+  if (!isStorySection(input.section)) {
     return { ok: false, error: "Unknown section." };
   }
   const imageUrl = clean(input.imageUrl);

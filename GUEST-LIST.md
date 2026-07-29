@@ -26,14 +26,24 @@ for the real domain once deployed.
 | Magic | — | http://localhost:3000/?guest=magic&code=love2026 |
 | Ruth Geiger | — | http://localhost:3000/?guest=ruth_geiger&code=love2026 |
 | Lydia Burrell | — | http://localhost:3000/?guest=lydia_burrell&code=love2026 |
-| Julie Ann Peterson | — | http://localhost:3000/?guest=julie_ann_peterson&code=love2026 |
+| Julie Ann Peterson | +1 | http://localhost:3000/?guest=julie_ann_peterson&code=love2026 |
 | Jansey Brewer | — | http://localhost:3000/?guest=jansey_brewer&code=love2026 |
 | Mary Ruple | — | http://localhost:3000/?guest=mary_ruple&code=love2026 |
 | Elizabeth Jackson | — | http://localhost:3000/?guest=elizabeth_jackson&code=love2026 |
-| Preston Peterson | — | http://localhost:3000/?guest=preston_peterson&code=love2026 |
-| Maris Morton | — | http://localhost:3000/?guest=maris_morton&code=love2026 |
+| Maris Morton | +1 | http://localhost:3000/?guest=maris_morton&code=love2026 |
 | Emmaline Hodson | — | http://localhost:3000/?guest=emmaline_hodson&code=love2026 |
 | Brooke Elam | — | http://localhost:3000/?guest=brooke_elam&code=love2026 |
+| Mark Croy | — | http://localhost:3000/?guest=mark_croy&code=love2026 |
+| Sharon Croy | — | http://localhost:3000/?guest=sharon_croy&code=love2026 |
+| Lexie Croy | — | http://localhost:3000/?guest=lexie_croy&code=love2026 |
+| Trey Croy | — | http://localhost:3000/?guest=trey_croy&code=love2026 |
+| Mr Stacy | — | http://localhost:3000/?guest=mr_stacy&code=love2026 |
+| Mrs Stacy | — | http://localhost:3000/?guest=mrs_stacy&code=love2026 |
+| Logan Stacy | — | http://localhost:3000/?guest=logan_stacy&code=love2026 |
+| Brandon Taylor | — | http://localhost:3000/?guest=brandon_taylor&code=love2026 |
+| Summer Woody | — | http://localhost:3000/?guest=summer_woody&code=love2026 |
+| Camden Croy | — | http://localhost:3000/?guest=camden_croy&code=love2026 |
+| Jordan Stacy | — | http://localhost:3000/?guest=jordan_stacy&code=love2026 |
 
 ## Notes
 

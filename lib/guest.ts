@@ -23,6 +23,20 @@ export function isValidAccessCode(code: string): boolean {
 }
 
 /**
+ * Normalize a free-text name into a URL-safe guest identifier:
+ * lowercase, with runs of non-alphanumeric characters collapsed to single
+ * underscores. Shared by the admin guest manager (live preview) and the
+ * admin server action (normalization) so both derive the same value.
+ */
+export function slugifyIdentifier(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+/**
  * Derive a display name from the guest identifier (Req 3.1, 3.5).
  * Returns null when no reasonable name can be derived.
  */

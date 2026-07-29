@@ -9,8 +9,8 @@ import {
   createStoryPhoto,
   updateStoryPhoto,
   deleteStoryPhoto,
-  type StorySection,
 } from "@/lib/admin-story-actions";
+import { type StorySection } from "@/lib/story-sections";
 
 /** A story photo row as rendered by the manager. Mapped in the dashboard. */
 export interface AdminStoryPhoto {

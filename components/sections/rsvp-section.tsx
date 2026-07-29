@@ -14,10 +14,16 @@ export function RsvpSection({
   invited,
   guestName,
   plusOne,
+  initialAttending = null,
+  initialBringingGuest = true,
+  initialMessage = "",
 }: {
   invited: boolean;
   guestName: string | null;
   plusOne: boolean;
+  initialAttending?: "yes" | "no" | null;
+  initialBringingGuest?: boolean;
+  initialMessage?: string;
 }) {
   return (
     <section id="rsvp" className="scroll-mt-32 border-t border-border py-20 sm:py-28">
@@ -28,7 +34,7 @@ export function RsvpSection({
             title="RSVP"
             subtitle={
               invited
-                ? "Placeholder RSVP form. It's fully clickable but responses aren't saved yet — we'll wire it to the database soon."
+                ? "We'd love to know if you can make it. You can update your response any time before the big day."
                 : "RSVP is for our invited guests. Open the personal link from your invitation to respond."
             }
           />
@@ -58,7 +64,13 @@ export function RsvpSection({
             {/* Form card (invited) or unlock prompt (everyone else) */}
             <div className="card flex flex-col p-6 sm:p-8">
               {invited ? (
-                <RsvpForm guestName={guestName} plusOne={plusOne} />
+                <RsvpForm
+                  guestName={guestName}
+                  plusOne={plusOne}
+                  initialAttending={initialAttending}
+                  initialBringingGuest={initialBringingGuest}
+                  initialMessage={initialMessage}
+                />
               ) : (
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <span className="inline-flex size-12 items-center justify-center rounded-full bg-surface-2 text-accent">

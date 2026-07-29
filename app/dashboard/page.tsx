@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/page-transition";
 import { AdminSignOut } from "@/components/admin-signout";
 import { RegistryManager, type AdminRegistryItem } from "@/components/registry-manager";
 import { StoryPhotosManager, type AdminStoryPhoto } from "@/components/story-photos-manager";
+import { GuestManager, type AdminGuest } from "@/components/guest-manager";
 import { DashboardTabs, type DashboardTab } from "@/components/dashboard-tabs";
 import { getAdminSession } from "@/lib/admin";
 import { formatPrice, REGISTRY_CATEGORY_ORDER } from "@/lib/content";
@@ -15,8 +16,8 @@ import {
   getStoryPhotos,
   summarizeRsvps,
   rsvpStatus,
+  isBringingPlusOne,
   type GuestWithRsvp,
-  type RsvpStatus,
 } from "@/lib/data";
 
 // Admin data is per-request and behind auth, so never prerender it.
@@ -24,18 +25,6 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Admin Dashboard",
-};
-
-const STATUS_LABELS: Record<RsvpStatus, string> = {
-  attending: "Attending",
-  declined: "Declined",
-  awaiting: "Awaiting reply",
-};
-
-const STATUS_STYLES: Record<RsvpStatus, string> = {
-  attending: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  declined: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-  awaiting: "bg-surface-2 text-muted",
 };
 
 function formatDate(date: Date | null | undefined): string {
@@ -119,6 +108,23 @@ export default async function DashboardPage() {
 
   const summary = guests ? summarizeRsvps(guests) : null;
 
+  // Shape guests for the RSVP table, which doubles as the management surface
+  // (CRUD + RSVP override + invite-link copy).
+  const adminGuests: AdminGuest[] | null = guests
+    ? guests.map((g) => ({
+        id: g.id,
+        name: g.name,
+        identifier: g.identifier,
+        accessCode: g.accessCode,
+        plusOne: g.plusOne,
+        rsvp: rsvpStatus(g),
+        bringingGuest: isBringingPlusOne(g),
+        guestCount: g.rsvp?.guestCount ?? 1,
+        respondedAt: g.rsvp?.respondedAt ?? null,
+        message: g.rsvp?.message ?? null,
+      }))
+    : null;
+
   // Category suggestions for the manage form: the configured order plus any
   // categories already present in the data.
   const registryCategories = registryItems
@@ -156,60 +162,21 @@ export default async function DashboardPage() {
               <p className="mb-6 text-sm text-muted">
                 Expected headcount from attending parties:{" "}
                 <span className="font-medium text-foreground">{summary.headcount}</span>
+                <span className="text-muted">
+                  {" "}
+                  ({summary.attending} {summary.attending === 1 ? "guest" : "guests"} +{" "}
+                  {summary.plusOnesAttending}{" "}
+                  {summary.plusOnesAttending === 1 ? "plus-one" : "plus-ones"})
+                </span>
               </p>
             </>
           ) : null}
 
-          {guests && guests.length > 0 ? (
-            <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border text-muted">
-                    <th className="px-5 py-3 font-medium">Guest</th>
-                    <th className="px-5 py-3 font-medium">Status</th>
-                    <th className="px-5 py-3 font-medium">Party size</th>
-                    <th className="px-5 py-3 font-medium">Responded</th>
-                    <th className="px-5 py-3 font-medium">Message</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {guests.map((guest) => {
-                    const status = rsvpStatus(guest);
-                    return (
-                      <tr key={guest.id} className="border-b border-border align-top last:border-0">
-                        <td className="px-5 py-4">
-                          <span className="font-medium text-foreground">{guest.name}</span>
-                          {guest.plusOne ? <span className="ml-2 text-xs text-muted">+1</span> : null}
-                        </td>
-                        <td className="px-5 py-4">
-                          <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_STYLES[status]}`}
-                          >
-                            {STATUS_LABELS[status]}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4 text-muted">
-                          {status === "attending" ? (guest.rsvp?.guestCount ?? 1) : "—"}
-                        </td>
-                        <td className="px-5 py-4 text-muted">
-                          {guest.rsvp ? formatDate(guest.rsvp.respondedAt) : "—"}
-                        </td>
-                        <td className="px-5 py-4 text-muted">
-                          {guest.rsvp?.message ? (
-                            <span className="line-clamp-2 max-w-xs">{guest.rsvp.message}</span>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          {adminGuests ? (
+            <GuestManager guests={adminGuests} />
           ) : (
             <p className="rounded-xl border border-border bg-surface p-8 text-center text-muted">
-              No guests yet.
+              Couldn&apos;t load guests.
             </p>
           )}
         </div>
