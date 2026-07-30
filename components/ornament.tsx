@@ -23,6 +23,38 @@ export function ArchOutline({ className }: { className?: string }) {
   );
 }
 
+/**
+ * A hand-drawn ink underline — a slightly irregular double stroke that reads as
+ * a brush/pen flourish beneath a heading. Inherits currentColor.
+ */
+export function InkUnderline({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 200 20"
+      fill="none"
+      preserveAspectRatio="none"
+      className={className}
+      aria-hidden
+    >
+      {/* main sweeping stroke */}
+      <path
+        d="M4 12 C40 5 78 5 110 8 C140 11 172 12 196 7"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      {/* lighter trailing stroke for a inked, layered look */}
+      <path
+        d="M14 16 C52 12 96 13 140 14 C160 14.5 178 14 190 12.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        opacity="0.55"
+      />
+    </svg>
+  );
+}
+
 /** A small symmetric botanical sprig, centered — a section-header flourish. */
 export function Sprig({ className }: { className?: string }) {
   return (

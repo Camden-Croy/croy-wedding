@@ -67,6 +67,42 @@ h3 {
   font-family: var(--font-display), ui-serif, Georgia, serif;
 }
 
+/*
+  Watercolor margin washes (home page). A slow, subtle breathing drift so the
+  splotches feel alive without pulling focus. Movement is intentionally small to
+  keep the washes tucked in the gutters; the reduced-motion block below disables
+  it entirely.
+*/
+.watercolor-blob {
+  animation: watercolor-drift 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes watercolor-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0) scale(1.04);
+  }
+}
+
+/*
+  Editorial drop cap — an oversized display initial for lead paragraphs
+  (e.g. the story intro). Reinforces the letterpress feel.
+*/
+.dropcap::first-letter {
+  float: left;
+  margin-right: 0.09em;
+  padding-top: 0.04em;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: 3.6em;
+  font-weight: 600;
+  line-height: 0.72;
+  color: var(--accent-strong);
+}
+
 /* Req 7.4 / 3.7.4: respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

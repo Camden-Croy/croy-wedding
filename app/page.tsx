@@ -3,13 +3,60 @@ import { StorySection } from "@/components/sections/story-section";
 import { DetailsSection } from "@/components/sections/details-section";
 import { FeaturedGallerySection } from "@/components/sections/featured-gallery-section";
 import { FeaturedRegistrySection } from "@/components/sections/featured-registry-section";
+import type { Metadata } from "next";
 import { RsvpSection } from "@/components/sections/rsvp-section";
+import { WatercolorMargins } from "@/components/watercolor-margins";
 import { getAccess } from "@/lib/access";
 import { getGuestRsvp } from "@/lib/data";
+import { deriveGuestName, isValidParam } from "@/lib/guest";
+import { WEDDING } from "@/lib/content";
 
 // Content is gated by visitor tier (invited vs public), which depends on
 // cookies, so render per request rather than prerendering.
 export const dynamic = "force-dynamic";
+
+/**
+ * Personalized share preview. Invite links carry `?guest=<slug>` (see the guest
+ * provider), so when a guest shares their link the crawler fetches that URL and
+ * we can bake their name into the Open Graph image + description. The image
+ * itself is generated at /api/og, which receives the derived display name since
+ * it can't read the visitor's session cookie.
+ */
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const guestParam = Array.isArray(params.guest) ? params.guest[0] : params.guest;
+  const name = isValidParam(guestParam) ? deriveGuestName(guestParam) : null;
+
+  const ogImage = name ? `/api/og?to=${encodeURIComponent(name)}` : "/api/og";
+  const title = `${WEDDING.coupleNames} · Wedding`;
+  const description = name
+    ? `${name}, you're invited to celebrate the wedding of ${WEDDING.coupleNames} — ${WEDDING.date}.`
+    : `You're invited to celebrate the wedding of ${WEDDING.coupleNames} — ${WEDDING.date}.`;
+  const alt = name
+    ? `Wedding invitation for ${name} — ${WEDDING.coupleNames}, ${WEDDING.date}`
+    : `Wedding invitation — ${WEDDING.coupleNames}, ${WEDDING.date}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
 
 export default async function HomePage() {
   const access = await getAccess();
@@ -23,7 +70,8 @@ export default async function HomePage() {
   const initialMessage = existingRsvp?.message ?? "";
 
   return (
-    <>
+    <div className="relative">
+      <WatercolorMargins />
       <HeroSection />
       <StorySection />
       <DetailsSection invited={invited} />
@@ -37,6 +85,6 @@ export default async function HomePage() {
         initialBringingGuest={initialBringingGuest}
         initialMessage={initialMessage}
       />
-    </>
+    </div>
   );
 }

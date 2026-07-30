@@ -59,7 +59,11 @@ export async function StorySection() {
     <section id="story" className="scroll-mt-32 border-t border-border py-20 sm:py-28">
       <div className="mx-auto max-w-5xl px-5">
         <Reveal>
-          <SectionHeader eyebrow="How it started" title="Our Story" subtitle={STORY_INTRO} />
+          <SectionHeader eyebrow="How it started" title="Our Story" flourish="underline" />
+          {/* Lead paragraph with an editorial drop cap. */}
+          <p className="dropcap mx-auto max-w-2xl text-balance leading-relaxed text-muted">
+            {STORY_INTRO}
+          </p>
         </Reveal>
 
         <div className="mt-8 space-y-16 sm:space-y-24">
