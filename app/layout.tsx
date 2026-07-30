@@ -17,10 +17,18 @@ const body = Inter({
   subsets: ["latin"],
 });
 
+// Absolute base URL for metadata (og:image etc). Link-preview crawlers
+// (iMessage, Slack, Facebook) fetch these from their own servers, so the URL
+// MUST be the public HTTPS domain — a localhost value means no preview image.
+// On Vercel, VERCEL_PROJECT_PRODUCTION_URL is the stable production domain and
+// requires no manual config; set NEXT_PUBLIC_SITE_URL to override (custom domain).
+const withHttps = (host: string) => (host.startsWith("http") ? host : `https://${host}`);
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL && withHttps(process.env.VERCEL_PROJECT_PRODUCTION_URL)) ??
   process.env.BETTER_AUTH_URL ??
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ??
+  "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

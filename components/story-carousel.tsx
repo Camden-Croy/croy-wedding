@@ -6,12 +6,28 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { StoryImage } from "@/lib/content";
 
 /**
+ * Keep the frame within tasteful bounds: tall enough for a portrait FaceTime
+ * screenshot (~0.46), but never so tall/wide it dominates the layout.
+ */
+const MIN_RATIO = 0.62; // portrait ceiling (a touch taller than 2:3)
+const MAX_RATIO = 1.5; // landscape ceiling (3:2)
+const FALLBACK_RATIO = 0.75; // portrait-leaning default before a photo measures
+
+const clampRatio = (r: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, r));
+
+/**
  * A clickable image carousel with captions, used for story moments that have
  * several photos (e.g. the long-distance FaceTime chapter). Navigate with the
  * arrows or the dots.
+ *
+ * The frame adapts to each photo's true aspect ratio instead of forcing a
+ * fixed crop — so tall FaceTime screenshots keep the whole face in view. The
+ * displayed photo is contained (never cropped) over a blurred copy of itself,
+ * which fills any letterbox gap so the frame always looks intentional.
  */
 export function StoryCarousel({ images }: { images: StoryImage[] }) {
   const [index, setIndex] = useState(0);
+  const [ratios, setRatios] = useState<Record<number, number>>({});
 
   if (images.length === 0) return null;
 
@@ -19,22 +35,51 @@ export function StoryCarousel({ images }: { images: StoryImage[] }) {
   const current = images[index];
   const go = (delta: number) => setIndex((prev) => (prev + delta + count) % count);
 
+  const currentRatio = ratios[index];
+  const frameRatio = clampRatio(currentRatio ?? FALLBACK_RATIO);
+
   return (
-    <figure className="w-full">
-      <div className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-lg">
+    <figure className="mx-auto w-full max-w-xs">
+      <div
+        className="group relative mx-auto w-full overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-lg transition-[aspect-ratio] duration-500 ease-out"
+        style={{ aspectRatio: String(frameRatio) }}
+      >
         {images.map((img, i) => (
-          <Image
+          <div
             key={img.src + i}
-            src={img.src}
-            alt={img.alt}
-            fill
-            sizes="(max-width: 1024px) 100vw, 45vw"
             className={
-              "object-cover transition-opacity duration-500 " +
+              "absolute inset-0 transition-opacity duration-500 " +
               (i === index ? "opacity-100" : "opacity-0")
             }
-            priority={i === 0}
-          />
+            aria-hidden={i !== index}
+          >
+            {/* Blurred backdrop fills any letterbox gap around the photo. */}
+            <Image
+              src={img.src}
+              alt=""
+              fill
+              aria-hidden
+              sizes="(max-width: 1024px) 100vw, 45vw"
+              className="scale-110 object-cover blur-xl brightness-90"
+              priority={i === 0}
+            />
+            {/* The actual photo, shown in full without cropping. */}
+            <Image
+              src={img.src}
+              alt={img.alt}
+              fill
+              sizes="(max-width: 1024px) 100vw, 45vw"
+              className="object-contain"
+              priority={i === 0}
+              onLoad={(e) => {
+                const el = e.currentTarget;
+                if (el.naturalWidth && el.naturalHeight) {
+                  const r = el.naturalWidth / el.naturalHeight;
+                  setRatios((prev) => (prev[i] === r ? prev : { ...prev, [i]: r }));
+                }
+              }}
+            />
+          </div>
         ))}
 
         {count > 1 ? (

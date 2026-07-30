@@ -35,13 +35,20 @@ model Partner {
   updatedAt DateTime @updatedAt
 }
 
-/// Gallery photos (Req 4).
+/// Gallery photos (Req 4). Admin-managed: images live in Vercel Blob and `url`
+/// holds the public blob URL. `caption` is an optional line shown in the
+/// fullscreen album view.
 model Photo {
   id        String   @id @default(cuid())
   url       String
+  /// Accessible alt text. Defaults to the caption or a generic label.
   alt       String
+  /// Optional caption shown beneath the image in the gallery lightbox.
+  caption   String?
   order     Int      @default(0)
   createdAt DateTime @default(now())
+
+  @@index([order])
 }
 
 /// Captioned photos for the "Our Story" long-distance chapter. `section`

@@ -5,6 +5,7 @@ import { PageTransition } from "@/components/page-transition";
 import { AdminSignOut } from "@/components/admin-signout";
 import { RegistryManager, type AdminRegistryItem } from "@/components/registry-manager";
 import { StoryPhotosManager, type AdminStoryPhoto } from "@/components/story-photos-manager";
+import { GalleryManager, type AdminGalleryPhoto } from "@/components/gallery-manager";
 import { GuestManager, type AdminGuest } from "@/components/guest-manager";
 import { DashboardTabs, type DashboardTab } from "@/components/dashboard-tabs";
 import { getAdminSession } from "@/lib/admin";
@@ -14,6 +15,7 @@ import {
   getRegistryClaims,
   getRegistryItems,
   getStoryPhotos,
+  getPhotos,
   summarizeRsvps,
   rsvpStatus,
   isBringingPlusOne,
@@ -71,6 +73,7 @@ export default async function DashboardPage() {
   let registryItems: AdminRegistryItem[] | null = null;
   let faceTimePhotos: AdminStoryPhoto[] | null = null;
   let visitPhotos: AdminStoryPhoto[] | null = null;
+  let galleryPhotos: AdminGalleryPhoto[] | null = null;
   let loadError = false;
 
   const toStoryPhoto = (p: { id: string; imageUrl: string; caption: string | null }): AdminStoryPhoto => ({
@@ -80,13 +83,15 @@ export default async function DashboardPage() {
   });
 
   try {
-    const [guestRows, claimRows, itemRows, faceTimeRows, visitRows] = await Promise.all([
-      getGuestsWithRsvps(),
-      getRegistryClaims(),
-      getRegistryItems(),
-      getStoryPhotos("facetime"),
-      getStoryPhotos("visits"),
-    ]);
+    const [guestRows, claimRows, itemRows, faceTimeRows, visitRows, galleryRows] =
+      await Promise.all([
+        getGuestsWithRsvps(),
+        getRegistryClaims(),
+        getRegistryItems(),
+        getStoryPhotos("facetime"),
+        getStoryPhotos("visits"),
+        getPhotos(),
+      ]);
     guests = guestRows;
     claims = claimRows;
     registryItems = itemRows.map((r) => ({
@@ -102,6 +107,11 @@ export default async function DashboardPage() {
     }));
     faceTimePhotos = faceTimeRows.map(toStoryPhoto);
     visitPhotos = visitRows.map(toStoryPhoto);
+    galleryPhotos = galleryRows.map((p) => ({
+      id: p.id,
+      imageUrl: p.url,
+      caption: p.caption ?? null,
+    }));
   } catch {
     loadError = true;
   }
@@ -273,6 +283,18 @@ export default async function DashboardPage() {
       ) : (
         <p className="rounded-xl border border-border bg-surface p-8 text-center text-muted">
           Couldn&apos;t load visit photos.
+        </p>
+      ),
+    },
+    {
+      key: "gallery",
+      label: "Gallery",
+      count: galleryPhotos?.length,
+      content: galleryPhotos ? (
+        <GalleryManager photos={galleryPhotos} />
+      ) : (
+        <p className="rounded-xl border border-border bg-surface p-8 text-center text-muted">
+          Couldn&apos;t load gallery photos.
         </p>
       ),
     },

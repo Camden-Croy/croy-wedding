@@ -86,7 +86,7 @@ export async function GET(request: Request) {
             left: 0,
             right: 0,
             bottom: 0,
-            background: `linear-gradient(90deg, rgba(${INK},0.90) 0%, rgba(${INK},0.72) 38%, rgba(${INK},0.35) 70%, rgba(${INK},0.15) 100%)`,
+            background: `linear-gradient(90deg, rgba(${INK},0.92) 0%, rgba(${INK},0.80) 42%, rgba(${INK},0.55) 72%, rgba(${INK},0.32) 100%)`,
           }}
         />
         {/* Gentle overall tint to unify the composition. */}
@@ -122,8 +122,7 @@ export async function GET(request: Request) {
             flexDirection: "column",
             justifyContent: "center",
             height: "100%",
-            padding: "0 94px",
-            maxWidth: 800,
+            padding: "0 76px",
           }}
         >
           <div
@@ -149,7 +148,7 @@ export async function GET(request: Request) {
                 marginTop: 26,
               }}
             >
-              Dear {name},
+              {`Dear ${name},`}
             </div>
           ) : null}
 
@@ -157,16 +156,18 @@ export async function GET(request: Request) {
             style={{
               display: "flex",
               alignItems: "baseline",
-              marginTop: name ? 6 : 26,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              marginTop: name ? 4 : 24,
               fontFamily: "Cormorant",
               fontWeight: 600,
-              fontSize: 116,
+              fontSize: 104,
               lineHeight: 1,
               color: WHITE,
             }}
           >
             <span>{WEDDING.partners.one.firstName}</span>
-            <span style={{ color: ROSE, margin: "0 22px" }}>&amp;</span>
+            <span style={{ color: ROSE, margin: "0 24px" }}>&amp;</span>
             <span>{WEDDING.partners.two.firstName}</span>
           </div>
 
@@ -215,6 +216,12 @@ export async function GET(request: Request) {
         { name: "Inter", data: interRegular, style: "normal", weight: 400 },
         { name: "Inter", data: interMedium, style: "normal", weight: 500 },
       ],
+      // Let the CDN + preview crawlers cache the rendered PNG (keyed by the full
+      // URL, incl. ?to=) so we don't re-render on every fetch and risk a crawler
+      // timeout. Safe to cache long — the content is deterministic per name.
+      headers: {
+        "cache-control": "public, no-transform, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+      },
     },
   );
 }

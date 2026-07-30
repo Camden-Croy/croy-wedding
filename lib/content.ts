@@ -376,6 +376,7 @@ export const STORY_MILESTONES: StoryMilestone[] = [
         id: "coming-home",
         label: "Coming home — June 20, 2026",
         body: "Placeholder: the day the distance finally closed for good, and everyday life together began.",
+        images: [{ src: "/photos/15.jpg", alt: "Camden & Jordan" }],
       },
     ],
   },

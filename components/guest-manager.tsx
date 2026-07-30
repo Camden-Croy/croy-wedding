@@ -114,11 +114,14 @@ export function GuestManager({ guests }: { guests: AdminGuest[] }) {
   // null = closed, "new" = add form open, otherwise the id being edited.
   const [openForm, setOpenForm] = useState<string | null>(null);
 
+  // Total headcount counts each invitation plus its plus-one when included.
+  const totalGuests = guests.reduce((sum, g) => sum + (g.plusOne ? 2 : 1), 0);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-muted">
-          {guests.length} {guests.length === 1 ? "guest" : "guests"}
+          {totalGuests} {totalGuests === 1 ? "guest" : "guests"}
         </p>
         {openForm !== "new" ? (
           <button

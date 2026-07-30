@@ -4,10 +4,14 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/reveal";
 import { SectionHeader } from "@/components/section-header";
 import { PHOTOS } from "@/lib/content";
+import { getGalleryPhotos } from "@/lib/data";
 
 /** Featured preview of the gallery; full collection lives on /gallery. */
-export function FeaturedGallerySection() {
-  const featured = PHOTOS.slice(0, 3);
+export async function FeaturedGallerySection() {
+  // Mirror the gallery page: uploaded photos win, static placeholders fall back.
+  const uploaded = await getGalleryPhotos();
+  const photos = uploaded.length > 0 ? uploaded : PHOTOS;
+  const featured = photos.slice(0, 3);
 
   return (
     <section id="gallery" className="scroll-mt-32 border-t border-border py-20 sm:py-28">

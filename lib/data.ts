@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { Photo } from "@/lib/content";
 
 /**
  * Server-side data access for the wedding site. Import these from Server
@@ -16,6 +17,25 @@ export function getPartners() {
 
 export function getPhotos() {
   return prisma.photo.findMany({ orderBy: { order: "asc" }, take: 200 });
+}
+
+/**
+ * Admin-managed gallery photos, mapped to the public `Photo` shape used by the
+ * gallery grid and homepage preview. Returns `[]` on failure so callers can
+ * fall back to the static placeholders in lib/content.ts.
+ */
+export async function getGalleryPhotos(): Promise<Photo[]> {
+  try {
+    const rows = await getPhotos();
+    return rows.map((p) => ({
+      id: p.id,
+      src: p.url,
+      alt: p.alt,
+      caption: p.caption ?? undefined,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export function getRegistryItems() {
