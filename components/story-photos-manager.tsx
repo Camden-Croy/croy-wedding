@@ -3,14 +3,16 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ImagePlus, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
+import { GripVertical, ImagePlus, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import {
   createStoryPhoto,
   updateStoryPhoto,
   deleteStoryPhoto,
+  reorderStoryPhotos,
 } from "@/lib/admin-story-actions";
 import { type StorySection } from "@/lib/story-sections";
+import { usePhotoReorder } from "@/components/use-photo-reorder";
 
 /** A story photo row as rendered by the manager. Mapped in the dashboard. */
 export interface AdminStoryPhoto {
@@ -42,6 +44,14 @@ export function StoryPhotosManager({
   // null = closed, "new" = add form open, otherwise the id being edited.
   const [openForm, setOpenForm] = useState<string | null>(null);
 
+  // Drag-and-drop reordering, scoped to this section. Locked while a form is
+  // open so the layout doesn't shift mid-edit.
+  const reorder = usePhotoReorder(
+    photos,
+    (orderedIds) => reorderStoryPhotos(section, orderedIds),
+    openForm !== null,
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
@@ -57,6 +67,24 @@ export function StoryPhotosManager({
           </button>
         ) : null}
       </div>
+
+      {photos.length > 1 && openForm === null ? (
+        <p className="flex items-center gap-2 text-xs text-muted">
+          <GripVertical className="size-3.5 shrink-0" aria-hidden />
+          <span>Drag photos to reorder how they appear, left to right.</span>
+          {reorder.saving ? (
+            <span className="inline-flex items-center gap-1 text-accent-strong">
+              <Loader2 className="size-3.5 animate-spin" aria-hidden /> Saving order…
+            </span>
+          ) : null}
+        </p>
+      ) : null}
+
+      {reorder.error ? (
+        <p className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-600 dark:text-rose-400">
+          {reorder.error}
+        </p>
+      ) : null}
 
       {openForm === "new" ? (
         <PhotoForm
@@ -74,7 +102,7 @@ export function StoryPhotosManager({
       ) : null}
 
       <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {photos.map((photo) =>
+        {reorder.order.map((photo) =>
           openForm === photo.id ? (
             <li key={photo.id} className="sm:col-span-2">
               <PhotoForm
@@ -91,7 +119,34 @@ export function StoryPhotosManager({
               />
             </li>
           ) : (
-            <li key={photo.id}>
+            <li
+              key={photo.id}
+              draggable={openForm === null}
+              onDragStart={() => reorder.onDragStart(photo.id)}
+              onDragEnter={() => reorder.onDragEnter(photo.id)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                reorder.onDrop(photo.id);
+              }}
+              onDragEnd={reorder.onDragEnd}
+              className={[
+                "group relative rounded-2xl transition",
+                openForm === null ? "cursor-grab active:cursor-grabbing" : "",
+                reorder.dragId === photo.id ? "opacity-50" : "",
+                reorder.overId === photo.id && reorder.dragId !== photo.id
+                  ? "ring-2 ring-accent ring-offset-2 ring-offset-background"
+                  : "",
+              ].join(" ")}
+            >
+              {openForm === null ? (
+                <span
+                  className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center rounded-full bg-background/80 p-1 text-muted opacity-0 shadow-sm backdrop-blur transition group-hover:opacity-100"
+                  aria-hidden
+                >
+                  <GripVertical className="size-4" />
+                </span>
+              ) : null}
               <PhotoRow
                 photo={photo}
                 disabled={openForm !== null}

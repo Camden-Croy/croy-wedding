@@ -183,3 +183,46 @@ export async function deleteStoryPhoto(id: string): Promise<StoryActionResult> {
     return { ok: false, error: "Couldn't delete the photo. Please try again." };
   }
 }
+
+/**
+ * Persist a new left-to-right, top-to-bottom order for one story moment's
+ * photos. `orderedIds` is the full list of photo ids for the given `section` in
+ * their desired reading order; each photo's `order` is set to its index. Scoped
+ * to `section` so a photo can never be pulled into another moment. Runs in a
+ * single transaction so the grid never ends up half-reordered.
+ */
+export async function reorderStoryPhotos(
+  section: StorySection,
+  orderedIds: string[],
+): Promise<StoryActionResult> {
+  const admin = await getAdminSession();
+  if (!admin.isAdmin) {
+    return { ok: false, forbidden: true, error: "Not authorized." };
+  }
+  if (!isStorySection(section)) {
+    return { ok: false, error: "Unknown section." };
+  }
+  if (
+    !Array.isArray(orderedIds) ||
+    orderedIds.some((id) => typeof id !== "string" || id.length === 0)
+  ) {
+    return { ok: false, error: "Invalid photo order." };
+  }
+
+  const { prisma } = await import("@/lib/prisma");
+  try {
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.storyPhoto.updateMany({
+          where: { id, section },
+          data: { order: index },
+        }),
+      ),
+    );
+
+    revalidateStory();
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't save the new order. Please try again." };
+  }
+}

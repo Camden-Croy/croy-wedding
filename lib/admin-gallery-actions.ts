@@ -181,3 +181,38 @@ export async function deleteGalleryPhoto(id: string): Promise<GalleryActionResul
     return { ok: false, error: "Couldn't delete the photo. Please try again." };
   }
 }
+
+/**
+ * Persist a new left-to-right, top-to-bottom order for the gallery. `orderedIds`
+ * is the full list of photo ids in their desired reading order; each photo's
+ * `order` is set to its index. Ids not present are left untouched. Runs in a
+ * single transaction so the grid never ends up half-reordered.
+ */
+export async function reorderGalleryPhotos(
+  orderedIds: string[],
+): Promise<GalleryActionResult> {
+  const admin = await getAdminSession();
+  if (!admin.isAdmin) {
+    return { ok: false, forbidden: true, error: "Not authorized." };
+  }
+  if (
+    !Array.isArray(orderedIds) ||
+    orderedIds.some((id) => typeof id !== "string" || id.length === 0)
+  ) {
+    return { ok: false, error: "Invalid photo order." };
+  }
+
+  const { prisma } = await import("@/lib/prisma");
+  try {
+    await prisma.$transaction(
+      orderedIds.map((id, index) =>
+        prisma.photo.update({ where: { id }, data: { order: index } }),
+      ),
+    );
+
+    revalidateGallery();
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Couldn't save the new order. Please try again." };
+  }
+}
