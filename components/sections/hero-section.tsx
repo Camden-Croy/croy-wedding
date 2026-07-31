@@ -8,7 +8,7 @@ import { ArchOutline } from "@/components/ornament";
 import { useGuest } from "@/app/guest-provider";
 import { WEDDING } from "@/lib/content";
 
-export function HeroSection() {
+export function HeroSection({ invited }: { invited: boolean }) {
   const { name } = useGuest();
 
   return (
@@ -27,13 +27,20 @@ export function HeroSection() {
           </h1>
 
           <p className="mt-8 max-w-xl text-lg text-muted lg:mx-0 mx-auto">
-            {name ? (
-              <>
-                <span className="text-accent-strong">Dear {name}</span>, we would be honored
-                to have you celebrate our wedding with us.
-              </>
+            {invited ? (
+              name ? (
+                <>
+                  <span className="text-accent-strong">Dear {name}</span>, we would be honored
+                  to have you celebrate our wedding with us.
+                </>
+              ) : (
+                <>We would be honored to have you celebrate our wedding with us.</>
+              )
             ) : (
-              <>We would be honored to have you celebrate our wedding with us.</>
+              <>
+                We&rsquo;re getting married in the Great Smoky Mountains, and we&rsquo;re so glad
+                you&rsquo;re here.
+              </>
             )}
           </p>
 
@@ -48,20 +55,25 @@ export function HeroSection() {
             </div>
           </dl>
 
-          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-            <Link
-              href="/#rsvp"
-              className="rounded-full bg-accent-strong px-7 py-3 text-sm font-medium text-white shadow-md transition-transform hover:-translate-y-0.5"
-            >
-              RSVP
-            </Link>
-            <Link
-              href="/#details"
-              className="rounded-full border border-border px-7 py-3 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-strong"
-            >
-              View details
-            </Link>
-          </div>
+          {/* Invitation CTAs are for invited guests only. Non-invitees who land
+              on the bare site get the neutral announcement above without a call
+              to RSVP or unlock invited-only details. */}
+          {invited ? (
+            <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+              <Link
+                href="/#rsvp"
+                className="rounded-full bg-accent-strong px-7 py-3 text-sm font-medium text-white shadow-md transition-transform hover:-translate-y-0.5"
+              >
+                RSVP
+              </Link>
+              <Link
+                href="/#details"
+                className="rounded-full border border-border px-7 py-3 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-strong"
+              >
+                View details
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         {/* --- Right: layered photo composition --- */}

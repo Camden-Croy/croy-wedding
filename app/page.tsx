@@ -33,12 +33,14 @@ export async function generateMetadata({
 
   const ogImage = name ? `/api/og?to=${encodeURIComponent(name)}` : "/api/og";
   const title = `${WEDDING.coupleNames} · Wedding`;
+  // Invited guests (link carries ?guest) get invitation language; a bare share
+  // to someone who isn't invited gets a neutral announcement instead.
   const description = name
     ? `${name}, you're invited to celebrate the wedding of ${WEDDING.coupleNames} — ${WEDDING.date}.`
-    : `You're invited to celebrate the wedding of ${WEDDING.coupleNames} — ${WEDDING.date}.`;
+    : `${WEDDING.coupleNames} are getting married — ${WEDDING.date}, in the Great Smoky Mountains.`;
   const alt = name
     ? `Wedding invitation for ${name} — ${WEDDING.coupleNames}, ${WEDDING.date}`
-    : `Wedding invitation — ${WEDDING.coupleNames}, ${WEDDING.date}`;
+    : `${WEDDING.coupleNames} are getting married — ${WEDDING.date}`;
 
   return {
     title,
@@ -72,7 +74,7 @@ export default async function HomePage() {
   return (
     <div className="relative">
       <WatercolorMargins />
-      <HeroSection />
+      <HeroSection invited={invited} />
       <StorySection />
       <DetailsSection invited={invited} />
       <FeaturedGallerySection />

@@ -6,14 +6,19 @@ import { WEDDING } from "@/lib/content";
 /**
  * Dynamic Open Graph image for the home page.
  *
- * Layers an invitation treatment over public/photos/1.jpg (Jordan with the
- * ring): the couple's names, a personalized "Dear {name}" greeting, and the
- * date/place, all sitting on a gray gradient wash so the text stays legible.
+ * Two treatments over public/photos/1.jpg (Jordan with the ring), both on a
+ * gray gradient wash so the text stays legible:
  *
- * The invitee name is passed in via `?to=<display name>` (see the home page's
- * `generateMetadata`), because the crawler fetches this URL directly and can't
- * see the visitor's cookies. Runs on the Node runtime so it can read the photo
- * and fonts off disk.
+ *  - Invitation (personalized): when `?to=<display name>` is present, shows a
+ *    "You're Invited" eyebrow + "Dear {name}," greeting. Invite links carry
+ *    `?guest=<slug>`, which the home page's `generateMetadata` turns into `?to=`.
+ *  - Announcement (generic): when there's no name — i.e. someone shared the bare
+ *    site URL with a non-invitee — shows a neutral "We're getting married" card
+ *    with no invitation language.
+ *
+ * The name is passed in via the query string because the crawler fetches this
+ * URL directly and can't see the visitor's cookies. Runs on the Node runtime so
+ * it can read the photo and fonts off disk.
  */
 export const runtime = "nodejs";
 
@@ -135,7 +140,7 @@ export async function GET(request: Request) {
               color: ROSE,
             }}
           >
-            You&rsquo;re Invited
+            {name ? "You\u2019re Invited" : "We\u2019re Getting Married"}
           </div>
 
           {name ? (
