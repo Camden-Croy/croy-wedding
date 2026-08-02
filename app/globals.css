@@ -103,6 +103,24 @@ h3 {
   color: var(--accent-strong);
 }
 
+/*
+  First-open invite reveal: prevent a flash of the un-revealed site before the
+  React overlay mounts. An inline script in app/layout adds `invite-pending` to
+  <html> synchronously (before first paint) when a fresh invite link is
+  detected; React removes it once the reveal overlay has taken over. Mirrors the
+  well-known theme-flash-prevention pattern.
+*/
+html.invite-pending {
+  overflow: hidden;
+}
+html.invite-pending::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: radial-gradient(circle at 50% 38%, var(--surface) 0%, var(--background) 72%);
+}
+
 /* Req 7.4 / 3.7.4: respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,

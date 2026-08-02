@@ -94,3 +94,33 @@ export function saveSession(session: GuestSession): void {
 export function sameSession(a: GuestSession | null, b: GuestSession | null): boolean {
   return !!a && !!b && a.guest === b.guest && a.code === b.code;
 }
+
+/* ----------------------------------------------------------------------------
+ * First-open invite reveal flag.
+ *
+ * The envelope reveal (app/invite-reveal.tsx) should play only the first time a
+ * given guest opens their personal link on this device. We persist a per-guest
+ * flag in localStorage so returning visits (or a bookmarked full link) skip it.
+ * ------------------------------------------------------------------------- */
+export const REVEAL_STORAGE_PREFIX = "croy-wedding:invite-revealed:";
+
+/** Whether the envelope reveal has already played for this guest on this device. */
+export function hasSeenReveal(guest: string): boolean {
+  if (typeof window === "undefined") return true; // never reveal during SSR
+  try {
+    return window.localStorage.getItem(REVEAL_STORAGE_PREFIX + guest) === "1";
+  } catch {
+    // Storage unavailable — treat as seen so we never loop or block the page.
+    return true;
+  }
+}
+
+/** Remember that the reveal has played for this guest, so it won't replay. */
+export function markRevealSeen(guest: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(REVEAL_STORAGE_PREFIX + guest, "1");
+  } catch {
+    /* storage may be unavailable; the reveal simply plays again next time */
+  }
+}

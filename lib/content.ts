@@ -334,7 +334,7 @@ export interface StoryMilestone {
 }
 
 export const STORY_INTRO =
-  "Placeholder for how you two met and everything since. Drop in the real story, the messy details and the good ones, and we'll shape the layout around it.";
+  "From a young adults group in 2023 to almost three years of long distance, here's how we got from hello to forever.";
 
 export const STORY_MILESTONES: StoryMilestone[] = [
   {
@@ -347,12 +347,12 @@ export const STORY_MILESTONES: StoryMilestone[] = [
     id: "long-distance",
     date: "Aug 2023 – June 2026",
     title: "Long distance",
-    body: "For almost three years, love meant time zones, airports, and always counting down to the next visit — right up until the distance finally closed for good.",
+    body: "For almost three years, love meant time zones, airports, and always counting down to the next visit, right up until the distance finally closed for good.",
     moments: [
       {
         id: "facetime",
         label: "Thousands of FaceTime hours",
-        body: "From August 2023 until Camden came home on June 20, 2026, FaceTime was our daily bridge — about an hour every morning and four or five each weekday evening, and easily eight to ten on weekends. In nearly three years we only missed a handful of days (Jordan's Madrid trip, Camden's trips to Dallas and Portland). By our rough math, that's well over 6,000 hours together on a screen — more than 250 days' worth of calls.",
+        body: "From August 2023 until Camden came home on June 20, 2026, FaceTime was our daily bridge, about an hour every morning and four or five each weekday evening, and easily eight to ten on weekends. In nearly three years we only missed a handful of days (Jordan's Madrid trip, Camden's trips to Dallas and Portland). By our rough math, that's well over 6,000 hours together on a screen, more than 250 days' worth of calls.",
         // Placeholder photos + captions — swap in real FaceTime screenshots / favorites.
         images: [
           { src: "/photos/2.jpg", alt: "Camden & Jordan", caption: "Morning call before work" },
@@ -366,7 +366,7 @@ export const STORY_MILESTONES: StoryMilestone[] = [
       {
         id: "visits",
         label: "Every visit we could",
-        body: "Placeholder: the trips back and forth, airport pickups, and the hard goodbyes at the gate.",
+        body: "We tried to see each other every month, alternating which way we'd go, up to Tennessee or down to Florida. We got very well acquainted with Allegiant's direct flight from TYS to FLL. We also learned that not many folks make the trip up from Fort Lauderdale to Tennessee for spring break.",
         images: [
           { src: "/photos/7.jpg", alt: "Camden & Jordan", caption: "Airport arrivals" },
           { src: "/photos/11.jpg", alt: "Camden & Jordan", caption: "Making the most of every weekend" },
@@ -374,8 +374,8 @@ export const STORY_MILESTONES: StoryMilestone[] = [
       },
       {
         id: "coming-home",
-        label: "Coming home — June 20, 2026",
-        body: "Placeholder: the day the distance finally closed for good, and everyday life together began.",
+        label: "Coming home, June 20, 2026",
+        body: "Closing the distance for good ended with a 13-hour drive up the East Coast, arriving Thursday the 18th and moving in Saturday the 20th. After almost three years apart, everyday life together finally began.",
         images: [{ src: "/photos/15.jpg", alt: "Camden & Jordan" }],
       },
     ],
@@ -384,14 +384,14 @@ export const STORY_MILESTONES: StoryMilestone[] = [
     id: "proposal",
     date: "The question",
     title: "The proposal",
-    body: "Placeholder: how the question was asked and answered.",
+    body: "After some convincing calls and plans, Jordan thought we were just heading to a Father's Day lunch following a normal church service. Instead, she was met by a wall of friends and family and a beautiful bouquet of flowers (thank you, Elizabeth!).",
     photo: "/photos/14.jpg",
   },
   {
     id: "now",
     date: "Today",
     title: "What's next",
-    body: "Placeholder: a line about the life you're building and the wedding to come.",
+    body: "We're getting married and planting roots in Knoxville for the foreseeable future, enjoying life together and striving to glorify the Lord.",
   },
 ];
 

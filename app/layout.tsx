@@ -36,6 +36,12 @@ export const metadata: Metadata = {
   description: "We're getting married — join us to celebrate our wedding.",
 };
 
+// Runs before first paint: if the URL is a fresh invite link (guest + code that
+// hasn't been revealed on this device), mark <html> so a full-screen cover
+// paints immediately, preventing a flash of the site before the envelope reveal
+// mounts. React removes the class once it takes over; a timeout is a safety net.
+const invitePendingScript = `(function(){try{var p=new URLSearchParams(location.search);var g=p.get('guest'),c=p.get('code');if(g&&c&&!localStorage.getItem('croy-wedding:invite-revealed:'+g)){document.documentElement.classList.add('invite-pending');setTimeout(function(){document.documentElement.classList.remove('invite-pending');},6000);}}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,8 +51,10 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${display.variable} ${body.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
+        <script dangerouslySetInnerHTML={{ __html: invitePendingScript }} />
         <GuestProvider>
           <MotionConfig reducedMotion="user">
             <Nav />

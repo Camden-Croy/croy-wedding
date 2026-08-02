@@ -60,8 +60,8 @@ export async function StorySection() {
       <div className="mx-auto max-w-5xl px-5">
         <Reveal>
           <SectionHeader eyebrow="How it started" title="Our Story" flourish="underline" />
-          {/* Lead paragraph with an editorial drop cap. */}
-          <p className="dropcap mx-auto max-w-2xl text-balance leading-relaxed text-muted">
+          {/* Centered lead paragraph. */}
+          <p className="mx-auto max-w-2xl text-center leading-relaxed text-muted">
             {STORY_INTRO}
           </p>
         </Reveal>
